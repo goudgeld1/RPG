@@ -26,6 +26,9 @@ dKeyJustUp = bge.logic.keyboard.events[bge.events.DKEY] == bge.logic.KX_INPUT_JU
 eKeyDown = bge.logic.keyboard.events[bge.events.EKEY] == bge.logic.KX_INPUT_ACTIVE
 eKeyJustUp = bge.logic.keyboard.events[bge.events.EKEY] == bge.logic.KX_INPUT_JUST_RELEASED
 
+gKeyJustDown = bge.logic.keyboard.events[bge.events.GKEY] == bge.logic.KX_INPUT_JUST_ACTIVATED
+
+qKeyDown = bge.logic.keyboard.events[bge.events.QKEY] == bge.logic.KX_INPUT_ACTIVE
 qKeyJustDown = bge.logic.keyboard.events[bge.events.QKEY] == bge.logic.KX_INPUT_JUST_ACTIVATED
 
 sKeyDown = bge.logic.keyboard.events[bge.events.SKEY] == bge.logic.KX_INPUT_ACTIVE
@@ -43,6 +46,7 @@ spaceKeyJustDown = bge.logic.keyboard.events[bge.events.SPACEKEY] == bge.logic.K
 
 # Get mouse input
 lMouseDown = bge.logic.mouse.events[bge.events.LEFTMOUSE] == bge.logic.KX_INPUT_ACTIVE
+lMouseUp = bge.logic.mouse.events[bge.events.LEFTMOUSE] == bge.logic.KX_INPUT_JUST_RELEASED
 
 # Change the camera view when pressing the v key
 if vKeyJustDown:
@@ -113,7 +117,7 @@ if curCont.sensors["GroundCollision"].positive and curCont.sensors["Jump"].posit
 curCont.deactivate("Jump")
 
 # Drop the wood you collected
-if qKeyJustDown and player["hout"] > 0:
+if qKeyDown and player["hout"] > 0:
     Eikenhout001 = curScene.objectsInactive["Eikenhout001"]
     OPE = curScene.objectsInactive["ObjectPlacementEmpty"]
 
@@ -123,6 +127,9 @@ if qKeyJustDown and player["hout"] > 0:
     curScene.addObject(Eikenhout001, OPE, 0)
     player["hout"] -= 1
 
+# Give the player 64 wood
+if gKeyJustDown:
+    player["hout"] += 64
 
 # Correct gravity for the player
 if curCont.sensors["GroundCollision"].positive:
@@ -164,10 +171,15 @@ if hit:
     elif hit["Type"] == "Hout":
         
         scenes[1].objects["ToolTip"].text = "Press E to take the wood"
-        
         if eKeyDown:
             hit.endObject()
             player["hout"] += 1
+        
+        if lMouseDown:
+            delta = rayVector.worldPosition - hit.worldPosition
+            hit.applyForce(delta * 1000 * hit.mass)
+            hit.setLinearVelocity([0, 0, 0])
+        
     elif hit["Grond"]:
         scenes[1].objects["ToolTip"].text = ""
 else:
